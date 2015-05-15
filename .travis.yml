@@ -16,7 +16,7 @@ before_deploy:
 - git config --global user.email "info@bodar.com"
 - git config --global user.name "Build Server"
 - git tag $BUILD_NUMBER -a -m "Build $BUILD_NUMBER"
-- git push -q https://$GITHUB_API_KEY@github.com/$TRAVIS_REPO_SLUG --tags
+- git push -q https://$GITHUB_API_KEY@github.com/$TRAVIS_REPO_SLUG --tags > /dev/null 2>&1
 
 branches:
   # Stop tagging above from triggering another build (infinite)
