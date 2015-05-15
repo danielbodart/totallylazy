@@ -4,14 +4,32 @@ jdk: oraclejdk8
 install:
 - sudo apt-get update
 - sudo apt-get install oracle-java8-installer
+
+env:
+  global:
+  - BUILD_NUMBER=2.$TRAVIS_BUILD_NUMBER
+
 script: bash ./jcompilo.sh
+
+before_deploy:
+# Create Tag!
+- git config --global user.email "info@bodar.com"
+- git config --global user.name "Build Server"
+- git tag $BUILD_NUMBER -a -m "Build $BUILD_NUMBER"
+- git push -q https://$GITHUB_API_KEY@github.com/$TRAVIS_REPO_SLUG --tags
+
+branches:
+  # Stop tagging above from triggering another build (infinite)
+  except:
+  - /^[0-9].[0-9]*/
+
 deploy:
   provider: releases
-  api_key:
-    secure: Dyhp9mM0aeKYLs9hf3XoY+J4kBthZdzHb+F+QULwc9Pu5lZyH0QAbR3xP1TKWL182lKJRa6M5tw914+UvsPxilgv1OtzY89tSS4etWsa/+F+NO7wn2FZhl1fbPJdZ+k6bBNne4vhTI4E+RcaJO5sqvhoPLYK+Zxd44tdllvqNfgvLAN3QHauKuj+o+gCJCe1NmWwR9eXwOmOITiySkJUO2okouqqAzd2REuAwD1Fqft5M5isse3ZvkLjZK+YCSb5cDu1sbRP3qPINhaPjWLGY42bW2/lC04dJbQFmFWgh13qYWSCaxjGmkANpuXDnamdO3ObVCMdpfWWuBvDgQLMAKIi+auKxuN72f88G7cgd+URP8Kb7gzAeeECuCi+Z8UV7xbGBFwUSdInk7udn1ttxQvlCzgTkp3aIw/J3TjnZFqSwQ3E5LnFsx9un/RcGkOWXdouwAi/Eap4k/t/Mpkg8IFVB4RSfs42Qgc+7BHk0dybSWzTRbkFZ3CP89JATud4MRWYiS5SYvJ/nG/CnWcCeVzLbMju+gh87cHcNKEXtpXaZGJWcEQGZTeae4S9HrlFXzFWAjj9QB7Lccu7k22qGg2TFQQUEMTKThIvnQoEdf3zwbbH3yCAJW7E5cll5It4jUnNpXzP/t6HjNIbo7wnHOxypUabRF0i74P4nI4dgg8=
+  api_key: $GITHUB_API_KEY
   file_glob: true
   file:
   - build/artifacts/*.jar
+  - build/artifacts/*.pack.gz
   - build/artifacts/*.pom
   on:
-    repo: danielbodart/totallylazy
+    repo: $TRAVIS_REPO_SLUG
